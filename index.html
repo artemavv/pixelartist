@@ -26,7 +26,44 @@
 	  stroke: #4691f6;
 	  stroke-width: 1;
 	}
+
+  .px-canvas{
+    display: table;
+    width: 100%;
+  }
+  .px-canvas-row {
+    display: table-row;
+  }
+  .px-canvas-heading {
+    background-color: #EEE;
+    display: table-header-group;
+  }
+  .px-canvas-cell, .px-canvas-head {
+    border: 1px solid #999999;
+    display: table-cell;
+    padding: 3px 10px;
+    height: 100px;
+    min-width: 100px;
+  }
+  .px-canvas-heading {
+    background-color: #EEE;
+    display: table-header-group;
+    font-weight: bold;
+  }
+  .px-canvasFoot {
+    background-color: #EEE;
+    display: table-footer-group;
+    font-weight: bold;
+  }
+  .px-canvas-body {
+    display: table-row-group;
+  }
+
 	</style>
+
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+
 </head>
 <body>
   
@@ -44,10 +81,139 @@
     <h1>Get started with Pixels</h1>
     <p class="fs-5 col-md-8">Voluptates ut deleniti porro est. Voluptatem rerum quo optio est. Iusto quia officia consequuntur. Dolor tenetur repudiandae ut atque architecto quis culpa fugiat. Expedita omnis aut voluptate quibusdam sed laboriosam. Vitae et aliquid porro quam ipsum odit ipsam.</p>
 
+    <div id="pixel_canvas"></div>
+<!--
+    <div class="px-canvas">
+      <div class="px-canvas-body">
+      <div class="px-canvas-row">
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      </div>
+      <div class="px-canvas-row">
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      </div>
+      <div class="px-canvas-row">
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      </div>
+      <div class="px-canvas-row">
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      </div>
+      <div class="px-canvas-row">
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      </div>
+      <div class="px-canvas-row">
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      </div>
+      <div class="px-canvas-row">
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      </div>
+      <div class="px-canvas-row">
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      </div>
+      <div class="px-canvas-row">
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      </div>
+      <div class="px-canvas-row">
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      <div class="px-canvas-cell">&nbsp;</div>
+      </div>
+      </div>
+      </div>-->
   </main>
   <footer class="pt-5 my-5 text-muted border-top">
     Created by the Pixels team &middot; &copy; 2022
   </footer>
+
+  <!-- Load our React component. -->
+  <script src="pixel_cell.js"></script>
 </div>
 </body>
 </html>

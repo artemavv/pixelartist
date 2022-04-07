@@ -59,10 +59,37 @@
     display: table-row-group;
   }
 
+
+  #palette ul {
+    padding: 0px;
+  }
+
+  #palette ul li {
+    list-style-type: none;
+    display:inline;
+  }
+
+  #palette .px-palette-cell {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+  }
+
+  #palette .cell-not-selected {
+    border: 2px solid #fff;
+  }
+
+  #palette .cell-selected {
+    border: 2px solid #000;
+  }
+
 	</style>
 
   <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+
+  <!-- Add Babel preprocessor. -->
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
 </head>
 <body>
@@ -81,51 +108,19 @@
     <h1>Get started with Pixels</h1>
     <p class="fs-5 col-md-8">Moo.</p>
     <canvas id="canvas" height="300px" width="300px" style="border: 1px solid;" ></canvas>
+
+    <div id="palette"></div>
   </main>
   <footer class="pt-5 my-5 text-muted border-top">
     Created by the Pixels team &middot; &copy; 2022
   </footer>
 
+
   <!-- Load our React component. -->
-  <!--<script src="pixel_cell.js"></script> -->
+  <script type="text/babel" src="pixel_cell.js"></script>
 
   <script>
 
-
-    var randomColor = function() {
-        let colors = [
-            '#C922D5',
-            '#D2691E',
-            '#E9967A',
-            '#2E8B57',
-            '#E0FFFF',
-            '#5F9EA0',
-            '#4169E1',
-            '#F5F5DC',
-            '#708090',
-            '#FFFF00',
-        ]
-        return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    var canvas = document.getElementById('canvas');
-    
-
-    if (canvas.getContext) {
-      var ctx = canvas.getContext('2d');
-
-      canvas.addEventListener("click", drawPixel);
-    }
-
-    var pixelWidth = 10;
-    var pixelHeight = 10;
-
-    function drawPixel(event) {
-      let pixelX = Math.floor(event.offsetX / pixelWidth) * pixelWidth;
-      let pixelY = Math.floor(event.offsetY / pixelHeight) * pixelHeight;
-      ctx.fillStyle = randomColor();
-      ctx.fillRect(pixelX, pixelY, pixelWidth, pixelHeight);
-    }
   </script>
 </div>
 </body>

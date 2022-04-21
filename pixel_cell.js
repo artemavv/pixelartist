@@ -55,6 +55,49 @@ class PaletteCell extends React.Component {
   }
 }
 
+
+
+
+class boardRectangle {
+	constructor(Xs,Ys,Xe,Ye) {
+    this.topCornerX = Xs;
+		this.topCornerY = Ys;
+		this.bottomCornerX = Xe;
+		this.bottomCornerY = Ye;
+	}
+}
+
+class boardCell {
+	constructor(x,y) {
+    this.x = x;
+    this.y = y;
+		
+		this.color = '#ffffff';
+		
+		this.writable = false;
+		
+		this.topBorder = false;
+		this.rightBorder = false;
+		this.bottomBorder = false;
+		this.leftBorder = false;
+  }
+}
+
+class boardState {
+	constructor(width, height) {
+    this.width = width;
+    this.height = height;
+		this.cells = new Array(width);
+		
+		for (let x = 0; x < width; x++) {
+      this.cells[x] = new Array(height);
+      for( let y = 0; y < height; y++) {
+				this.cells[x][y] = new boardCell(x,y); // white non-writable cell, no borders
+			}
+		}
+  }
+}
+
 var ctx; //global variable for canvas context
 
 const paletteColors = [
@@ -79,16 +122,24 @@ class Board extends React.Component {
       boardPxHeight: props.height * props.pixelHeight,
       boardPxWidth: props.width * props.pixelWidth 
     };
-
-    this.cellColors = this.initCellColors(this.props.height, this.props.width);
+		
+		this.boardState = new boardState(props.width, props.height);
 
     this.handleClick = this.handleClick.bind(this);
-    this.setCellColor = this.setCellColor.bind(this);
+    
+		this.setCellColor = this.setCellColor.bind(this);
+		this.setCellWritable = this.setCellWritable.bind(this);
+		this.getCellWritable = this.getCellWritable.bind(this);
+		this.setWritableState = this.setWritableState.bind(this);
+		this.prepareWritableRegion = this.prepareWritableRegion.bind(this);
+		
+		
+		
     this.drawCell = this.drawCell.bind(this);
     this.drawBoardCells = this.drawBoardCells.bind(this);
     this.setRandomBorders = this.setRandomBorders.bind(this);
     this.drawBoardBorders = this.drawBoardBorders.bind(this);
-    this.isInsideBorder = this.isInsideBorder.bind(this);
+    //this.isInsideBorder = this.isInsideBorder.bind(this);
     
   }
 
@@ -104,35 +155,30 @@ class Board extends React.Component {
 
     this.setRandomBorders();
     this.drawBoardCells();
-    this.drawBoardBorders();
+    //this.drawBoardBorders();
   }
 
   handleClick(event) {
     let cellX = Math.floor(event.offsetX / this.props.pixelWidth);
     let cellY = Math.floor(event.offsetY / this.props.pixelHeight);
 
-    if ( this.isInsideBorder(cellX, cellY) ) {
-      this.setCellColor(cellX, cellY, getCurrentColor())
+    if ( this.isCellWritable(cellX, cellY) ) {
+      this.setCellColor(cellX, cellY, getCurrentColor());
       this.drawBoardCells();
-      this.drawBoardBorders();
+      //this.drawBoardBorders();
     }
-  }
-
-  initCellColors( height, width ) {
-    let cellColors = new Array(width);
-
-    for (let x = 0; x < width; x++) {
-      cellColors[x] = new Array(height);
-
-      for( let y = 0; y < height; y++) {
-        cellColors[x][y] = '#ffffff';
-      }
-    }
-    return cellColors;
   }
 
   setCellColor(x,y,color) {
-    this.cellColors[x][y] = color;
+    this.boardState.cells[x][y].color = color;
+  }
+	
+  setCellWritable(x,y,writable) {
+    this.boardState.cells[x][y].writable = writable;
+  }
+	
+	getCellWritable(x,y) {
+    return this.boardState.cells[x][y].writable;
   }
 
   drawCell(x,y,color) {
@@ -152,47 +198,113 @@ class Board extends React.Component {
   drawBoardCells() {
     for (let x = 0; x < this.props.width; x++) {
       for( let y = 0; y < this.props.height; y++) {
-        this.drawCell(x,y,this.cellColors[x][y])
+        this.drawCell(x,y,this.boardState.cells[x][y].color);
       }
     }
   }
 
-  setRandomBorders() {
 
-    let X1 = 0, Y1 = 0, X2 = 0, Y2 = 0;
+	setRandomBorders() {
+		
+		//const newBoardState = ;
+		this.setWritableState(this.prepareWritableRegion(50));
+		//this.calcWritableBorders();
+	}
+	
+	setWritableState(newState) {
+		if (newState !== false) {
+			for (let x = 0; x < this.props.width; x++) {
+				for( let y = 0; y < this.props.height; y++) {
+					this.setCellWritable(x,y,newState[x][y]);
+					this.setCellColor(x,y,newState[x][y] ? '#336699' : '#ffffff');
+				}
+			}		
+		}
+	}
+	
+	calcWritableBorders() {
+		
+	}
+	
+  prepareWritableRegion( maxArea ) {
 
-    let i = 0;
-    while ( X1 == Y2 || Y1 == Y2 ) { // make sure all coords are different
-      // define two sets of coordinates
-      X1 = Math.floor(Math.random() * this.props.width);
-      Y1 = Math.floor(Math.random() * this.props.height);
-      X2 = Math.floor(Math.random() * this.props.width);
-      Y2 = Math.floor(Math.random() * this.props.height);
-
-      console.log(X1,Y1,X2,Y2);
-
-      if (i++ > 100 ) break;
-    }
-    
-    // choose coords for top left corner
-    let Xs = X1 > X2 ? X2 : X1;
-    let Ys = Y1 > Y2 ? Y2 : Y1;
-
-    // choose coords for bottom right corner
-    let Xe = X1 > X2 ? X1 : X2;
-    let Ye = Y1 > Y2 ? Y1 : Y2;
-
-     
-    const topCorner = [Xs,Ys];
-    const bottomCorner = [Xe,Ye];
-      
-    this.state.borders = [topCorner, bottomCorner];
-    console.log('border', [topCorner, bottomCorner]);
+		let currentArea = maxArea + 1;
+		let newWritableRegion = false;
+		
+		while (currentArea > maxArea ) {
+			var rect = this.generateRandomRectangle();
+			if ( rect !== false ) {
+				newWritableRegion = this.extendWritableRegion(rect);
+				currentArea = this.calcArea(newWritableRegion);
+			}
+		} 
+   
+		console.log('newWritableRegion', newWritableRegion);
+		console.log('currentArea', currentArea);
+    return newWritableRegion;
   }
+	
+	extendWritableRegion ( rectangle ) {
+		
+		var newRegion = new Array(this.props.width);
+		
+		for (let x = 0; x < this.props.width; x++) {
+			newRegion[x] = new Array(this.props.height);
+			for( let y = 0; y < this.props.height; y++) {
+				newRegion[x][y] = this.getCellWritable(x,y);
+				
+				if ( this.isInsideRectangle(x,y,rectangle) ) {
+					newRegion[x][y] = true;
+				}
+			}
+		}		
+		
+		return newRegion;
+	}
+	
+	calcArea( region ) {
+		let area = 0;
+		for (let x = 0; x < this.props.width; x++) {
+			for( let y = 0; y < this.props.height; y++) {
+				if (region.writable) {
+					area++;
+				}
+			}
+		}	
+		return area;
+	}
+	
+	generateRandomRectangle() {
+		
+		let i = 0;
+		let X1 = 0, Y1 = 0, X2 = 0, Y2 = 0;
+		
+		// define two sets of coordinates
+		while ( X1 === Y2 || Y1 === Y2 ) { // make sure all coords are different
+			X1 = Math.floor(Math.random() * this.props.width);
+			Y1 = Math.floor(Math.random() * this.props.height);
+			X2 = Math.floor(Math.random() * this.props.width);
+			Y2 = Math.floor(Math.random() * this.props.height);
+			
+			// choose coords for top left corner
+			let Xs = X1 > X2 ? X2 : X1;
+			let Ys = Y1 > Y2 ? Y2 : Y1;
 
-  isInsideBorder( cellX, cellY) {
-    const isInsideHorizontally = (this.state.borders[0][0] <= cellX) && (cellX < this.state.borders[1][0]);
-    const isInsideVertically = (this.state.borders[0][1] <= cellY) && (cellY < this.state.borders[1][1]);
+			// choose coords for bottom right corner
+			let Xe = X1 > X2 ? X1 : X2;
+			let Ye = Y1 > Y2 ? Y1 : Y2;
+			
+			var rect = new boardRectangle(Xs,Ys,Xe,Ye);
+      if ( i++ > 100 ) return false;
+    }
+
+    console.log('generateRandomRectangle', rect);
+		return rect;
+	}
+
+  isInsideRectangle( x, y, rectangle) {
+    const isInsideHorizontally = (rectangle.topCornerX <= x) && (x < rectangle.bottomCornerX);
+    const isInsideVertically = (rectangle.topCornerY <= y) && (y < rectangle.bottomCornerY);
 
     return isInsideHorizontally && isInsideVertically;
   }

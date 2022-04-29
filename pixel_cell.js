@@ -65,6 +65,10 @@ class boardRectangle {
 		this.bottomCornerX = Xe;
 		this.bottomCornerY = Ye;
 	}
+	
+	calcArea() {
+		return  Math.abs((this.bottomCornerY - this.topCornerY) * (this.topCornerX - this.bottomCornerX));
+	}
 }
 
 class boardCell {
@@ -129,10 +133,11 @@ class Board extends React.Component {
     
 		this.setCellColor = this.setCellColor.bind(this);
 		this.setCellWritable = this.setCellWritable.bind(this);
-		this.getCellWritable = this.getCellWritable.bind(this);
+		this.isCellWritable = this.isCellWritable.bind(this);
 		this.setWritableState = this.setWritableState.bind(this);
-		this.prepareWritableRegion = this.prepareWritableRegion.bind(this);
-		
+		this.calculateRegionExtended = this.calculateRegionExtended.bind(this);
+		this.calcRegionArea = this.calcRegionArea.bind(this);
+		this.calcWritableBorders = this.calcWritableBorders.bind(this);
 		
 		
     this.drawCell = this.drawCell.bind(this);
@@ -155,7 +160,7 @@ class Board extends React.Component {
 
     this.setRandomBorders();
     this.drawBoardCells();
-    //this.drawBoardBorders();
+    this.drawBoardBorders();
   }
 
   handleClick(event) {
@@ -165,7 +170,7 @@ class Board extends React.Component {
     if ( this.isCellWritable(cellX, cellY) ) {
       this.setCellColor(cellX, cellY, getCurrentColor());
       this.drawBoardCells();
-      //this.drawBoardBorders();
+      this.drawBoardBorders();
     }
   }
 
@@ -177,7 +182,7 @@ class Board extends React.Component {
     this.boardState.cells[x][y].writable = writable;
   }
 	
-	getCellWritable(x,y) {
+	isCellWritable(x,y) {
     return this.boardState.cells[x][y].writable;
   }
 
@@ -206,9 +211,16 @@ class Board extends React.Component {
 
 	setRandomBorders() {
 		
-		//const newBoardState = ;
-		this.setWritableState(this.prepareWritableRegion(50));
-		//this.calcWritableBorders();
+		let writableArea = 0;
+		const maxWritableArea = 300;
+		
+		while ( writableArea < maxWritableArea ) {
+			let rect = this.prepareRectangle(150);
+			let boardRegion = this.calculateRegionExtended(rect);
+			this.setWritableState(boardRegion);
+			writableArea = this.calcRegionArea(boardRegion);
+		}
+		this.calcWritableBorders();
 	}
 	
 	setWritableState(newState) {
@@ -216,42 +228,74 @@ class Board extends React.Component {
 			for (let x = 0; x < this.props.width; x++) {
 				for( let y = 0; y < this.props.height; y++) {
 					this.setCellWritable(x,y,newState[x][y]);
-					this.setCellColor(x,y,newState[x][y] ? '#336699' : '#ffffff');
+					this.setCellColor(x,y,newState[x][y] ? '#eeeeee' : '#ffffff');
 				}
 			}		
 		}
 	}
 	
 	calcWritableBorders() {
-		
+		for (let x = 0; x < this.props.width; x++) {
+			for( let y = 0; y < this.props.height; y++) {
+				
+				const currentCell = this.boardState.cells[x][y];
+				
+				if ( y > 0 ) {
+					const adjacentTopCell = this.boardState.cells[x][y-1];
+					if ( currentCell.writable && !adjacentTopCell.writable ) {
+						this.boardState.cells[x][y].topBorder = true;
+					}
+				}
+				
+				if ( x > 0 ) {
+					const adjacentLeftCell = this.boardState.cells[x-1][y];
+					if ( currentCell.writable && !adjacentLeftCell.writable ) {
+						this.boardState.cells[x][y].leftBorder = true;
+					}
+				}
+				
+				if ( x < this.props.width - 1 ) {
+					const adjacentRightCell = this.boardState.cells[x+1][y];
+					if ( currentCell.writable && !adjacentRightCell.writable ) {
+						this.boardState.cells[x][y].rightBorder = true;
+					}
+				}
+				
+				if ( y < this.props.width - 1 ) {
+					const adjacentBottomCell = this.boardState.cells[x][y+1];
+					if ( currentCell.writable && !adjacentBottomCell.writable ) {
+						this.boardState.cells[x][y].bottomBorder = true;
+					}
+				}
+					
+			}
+		}
 	}
 	
-  prepareWritableRegion( maxArea ) {
+  prepareRectangle( maxArea ) {
 
-		let currentArea = maxArea + 1;
-		let newWritableRegion = false;
+		let rectArea = maxArea + 1;
 		
-		while (currentArea > maxArea ) {
+		while (rectArea > maxArea ) {
 			var rect = this.generateRandomRectangle();
 			if ( rect !== false ) {
-				newWritableRegion = this.extendWritableRegion(rect);
-				currentArea = this.calcArea(newWritableRegion);
+				rectArea = rect.calcArea();
 			}
 		} 
    
-		console.log('newWritableRegion', newWritableRegion);
-		console.log('currentArea', currentArea);
-    return newWritableRegion;
+		//console.log('newWritableRegion', newWritableRegion);
+		//console.log('rectArea', rectArea);
+    return rect;
   }
 	
-	extendWritableRegion ( rectangle ) {
+	calculateRegionExtended ( rectangle ) {
 		
 		var newRegion = new Array(this.props.width);
 		
 		for (let x = 0; x < this.props.width; x++) {
 			newRegion[x] = new Array(this.props.height);
 			for( let y = 0; y < this.props.height; y++) {
-				newRegion[x][y] = this.getCellWritable(x,y);
+				newRegion[x][y] = this.isCellWritable(x,y);
 				
 				if ( this.isInsideRectangle(x,y,rectangle) ) {
 					newRegion[x][y] = true;
@@ -262,11 +306,11 @@ class Board extends React.Component {
 		return newRegion;
 	}
 	
-	calcArea( region ) {
+	calcRegionArea( region ) {
 		let area = 0;
 		for (let x = 0; x < this.props.width; x++) {
 			for( let y = 0; y < this.props.height; y++) {
-				if (region.writable) {
+				if (region[x][y]) {
 					area++;
 				}
 			}
@@ -284,7 +328,7 @@ class Board extends React.Component {
 			X1 = Math.floor(Math.random() * this.props.width);
 			Y1 = Math.floor(Math.random() * this.props.height);
 			X2 = Math.floor(Math.random() * this.props.width);
-			Y2 = Math.floor(Math.random() * this.props.height);
+			Y2 = Y1 + (X2 - X1); //Math.floor(Math.random() * this.props.height);
 			
 			// choose coords for top left corner
 			let Xs = X1 > X2 ? X2 : X1;
@@ -298,7 +342,7 @@ class Board extends React.Component {
       if ( i++ > 100 ) return false;
     }
 
-    console.log('generateRandomRectangle', rect);
+    //console.log('generateRandomRectangle', rect);
 		return rect;
 	}
 
@@ -310,6 +354,77 @@ class Board extends React.Component {
   }
 
   drawBoardBorders() {
+		
+		ctx.strokeStyle = '#44eaed';
+		
+		for (let x = 0; x < this.props.width; x++) {
+			for( let y = 0; y < this.props.height; y++) {
+				
+				const currentCell = this.boardState.cells[x][y];
+				
+				if ( currentCell.topBorder ) {
+					
+					let startX = x * this.props.pixelWidth;
+					let endX = startX + (+this.props.pixelWidth);
+					
+					let startY = y * this.props.pixelHeight;
+					let endY = startY;
+					
+					ctx.beginPath();
+					ctx.moveTo( startX, startY );
+					ctx.lineTo( endX, endY );
+					ctx.stroke();
+					ctx.closePath();
+				}
+				
+				if ( currentCell.leftBorder ) {
+					
+					let startX = x * this.props.pixelWidth;
+					let endX = startX;
+					
+					let startY = y * this.props.pixelHeight;
+					let endY = startY + (+this.props.pixelHeight);
+					
+					ctx.beginPath();
+					ctx.moveTo( startX, startY );
+					ctx.lineTo( endX, endY );
+					ctx.stroke();
+					ctx.closePath();
+				}
+				
+				if ( currentCell.bottomBorder ) {
+					
+					let startX = x * this.props.pixelWidth;
+					let endX = startX +(+this.props.pixelWidth);
+					
+					let startY = (y+1) * this.props.pixelHeight;
+					let endY = startY;
+					
+					ctx.beginPath();
+					ctx.moveTo( startX, startY );
+					ctx.lineTo( endX, endY );
+					ctx.stroke();
+					ctx.closePath();
+				}
+				
+				if ( currentCell.rightBorder ) {
+					
+					let startX = (x+1) * this.props.pixelWidth;
+					let endX = startX;
+					
+					let startY = y * this.props.pixelHeight;
+					let endY = startY + (+this.props.pixelHeight);
+					
+					ctx.beginPath();
+					ctx.moveTo( startX, startY );
+					ctx.lineTo( endX, endY );
+					ctx.stroke();
+					ctx.closePath();
+				}
+			}
+		}
+
+		/*
     ctx.fillStyle = '#44eaed';
 
     console.log(this.state);
@@ -322,6 +437,8 @@ class Board extends React.Component {
 
     ctx.strokeStyle = '#44eaed';
     ctx.strokeRect(borderTopX, borderTopY, borderWidth, borderHeight);
+		 * 
+		 */
   }
 
   render() {
